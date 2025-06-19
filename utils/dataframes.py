@@ -223,21 +223,32 @@ def build_state_df(defaults: dict) -> pd.DataFrame:
     )
 
 
-def load_price_df(csv_path: str, year: int, month: int) -> pd.DataFrame:
+def load_price_df(
+    csv_path: str, country: str, trading_point: str, year: int, month: int
+) -> pd.DataFrame:
     """
     Load and filter the unified energy dataset for a specific year and month.
     Returns a DataFrame indexed by an incremental hour column.
     """
+
+    countries_dic = {"Belgium": "BE", "France": "FR"}
+
+    country_short = countries_dic[country]
+
     price_df = pd.read_csv(csv_path)
     price_df["Datetime"] = pd.to_datetime(price_df["Datetime"])
 
     filtered = price_df[
         (price_df["Datetime"].dt.year == year)
         & (price_df["Datetime"].dt.month == month)
-    ][["Datetime", "BE", "ZTP", "EUA Prices"]]
+    ][["Datetime", country_short, trading_point, "EUA Prices"]]
 
     filtered = filtered.rename(
-        columns={"BE": "power_price", "ZTP": "gas_price", "EUA Prices": "co2_price"}
+        columns={
+            country_short: "power_price",
+            trading_point: "gas_price",
+            "EUA Prices": "co2_price",
+        }
     )
 
     filtered["hour"] = range(len(filtered))

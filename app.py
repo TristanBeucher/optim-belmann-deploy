@@ -7,6 +7,7 @@ from layout.plant_caracteristics_page import (
     render_min_off_on,
 )
 from layout.ramps_page import render_cold_ramp, render_hot_ramp, render_warm_ramp
+from layout.readme_page import render_readme
 from layout.summary_page import render_summary
 
 # Default values
@@ -118,6 +119,9 @@ page = st.sidebar.radio(
         "Optimal Dispatch",
     ],
 )
+if page == "Read me":
+
+    render_readme()
 
 # Page 1: Plant's specifications
 if page == "Plant's Caracteristics, Constraints and Costs":

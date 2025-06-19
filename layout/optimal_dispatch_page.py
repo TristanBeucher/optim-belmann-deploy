@@ -15,6 +15,33 @@ def render_optimal_dispatch(defaults, initial_state):
 
     st.title("Optimal Dispatch")
 
+    # --- Selectors ---
+    st.markdown("### Select Simulation Parameters")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        country = st.selectbox("Country", options=["Belgium", "France"], index=0)
+
+    with col2:
+        trading_point = st.selectbox(
+            "Gas Trading Point", options=["ZTP", "PEG"], index=0
+        )
+
+    with col3:
+        month_label = st.selectbox("Month", options=["April", "May", "June"], index=1)
+
+    with col4:
+        year = st.selectbox("Year", options=[2025], index=0)
+
+    # Map month label to numerical value
+    month_map = {"April": 4, "May": 5, "June": 6}
+    month = month_map[month_label]
+
+    st.markdown(
+        f"**Selected Period**: {month_label} {year} for {country} and {trading_point} gas trading point"
+    )
+
     if st.button("Run Optimization"):
 
         constraints_df = build_constraints_df(defaults)
@@ -22,7 +49,7 @@ def render_optimal_dispatch(defaults, initial_state):
         power_df = build_power_df(defaults)
         state_df = build_state_df(defaults)
         filtered_price_df = load_price_df(
-            "data/unified_energy_dataset.csv", year=2025, month=5
+            "data/unified_energy_dataset.csv", country, trading_point, year, month
         )
 
         transition_df = create_list_states(
@@ -30,11 +57,15 @@ def render_optimal_dispatch(defaults, initial_state):
         )
 
         v, policy = bellman_optimization(
-            transition_df, filtered_price_df, initial_state, 744, ef=0.18
+            transition_df,
+            filtered_price_df,
+            initial_state,
+            filtered_price_df.shape[0],
+            ef=0.18,
         )
         path = []
         state = initial_state
-        for t in range(744):
+        for t in range(filtered_price_df.shape[0]):
             path.append(state)
             state = policy[t].get(state, None)
             if state is None:
