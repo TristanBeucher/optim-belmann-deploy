@@ -18,13 +18,14 @@ def render_readme():
     
     **Scope:** I assume the market prices are known and, because of that, the program is more related to a backtest of the strategy. For now, only Belgium and France are included in the study. 
                 
-    This page describes the structure of the application, for more details about the implementation or about the different constraints, please check the article on my blog:
+    This page describes the structure of the application. 
     """
     )
 
+    url = "https://tristanbeucher.github.io/ccgt-dispatch-optimization-with-bellman-algorithm"
     st.markdown(
-        '<a href="https://tristanbeucher.github.io/ccgt-dispatch-optimization-with-bellman-algorithm" target="_blank"></a>',
-        unsafe_allow_html=True,
+        "For more details about the implementation or about the different constraints, please check my blog [post](%s)"
+        % url
     )
 
     st.markdown("### How It Works")

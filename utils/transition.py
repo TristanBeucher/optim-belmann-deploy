@@ -48,6 +48,12 @@ def create_list_states(state_df, constraints_df, power_df, efficiency_df):
                     next_state = f"FULL_LOAD-{i+1}"
                     label = f"{state}-{i}"
                     startup = i == 1
+
+                elif i == ramp_to_full and i == min_hours_on:
+                    next_state = "FULL_LOAD"
+                    label = f"{state}-{i}"
+                    startup = False
+
                 elif i > ramp_to_full and i < min_hours_on:
                     next_state = f"FULL_LOAD-{i+1}"
                     label = f"FULL_LOAD-{i}"

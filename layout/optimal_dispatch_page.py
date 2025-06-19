@@ -42,7 +42,35 @@ def render_optimal_dispatch(defaults, initial_state):
         f"**Selected Period**: {month_label} {year} for {country} and {trading_point} gas trading point"
     )
 
+    offline_limit_hours_warm = st.session_state.get(
+        "offline_limit_hours_warm", st.session_state["offline_limit_hours_warm"]
+    )
+
+    initial_mode = st.radio("Is the plant initially ON or OFF?", ["ON", "OFF"])
+
+    if initial_mode == "ON":
+        initial_state = "FULL_LOAD"
+    else:
+        off_hours = st.number_input(
+            "How many hours has the plant been OFF?",
+            min_value=0,
+            max_value=9999,
+            value=20,
+        )
+        # Get limit from defaults
+        if off_hours > offline_limit_hours_warm:
+            initial_state = "OFF"
+        else:
+            initial_state = f"OFF_{off_hours}"
+
     if st.button("Run Optimization"):
+
+        efficiency = (
+            st.session_state.get("efficiency_full", defaults["efficiency_full"]) / 100
+        )
+        emission_factor = st.session_state.get(
+            "emission_factor", defaults["emission_factor"]
+        )
 
         constraints_df = build_constraints_df(defaults)
         efficiency_df = build_efficiency_df(defaults)
@@ -61,7 +89,7 @@ def render_optimal_dispatch(defaults, initial_state):
             filtered_price_df,
             initial_state,
             filtered_price_df.shape[0],
-            ef=0.18,
+            emission_factor,
         )
         path = []
         state = initial_state
@@ -73,13 +101,6 @@ def render_optimal_dispatch(defaults, initial_state):
 
         final_df = filtered_price_df.copy()
         final_df["Path"] = path
-
-        efficiency = (
-            st.session_state.get("efficiency_full", defaults["efficiency_full"]) / 100
-        )
-        emission_factor = st.session_state.get(
-            "emission_factor", defaults["emission_factor"]
-        )
 
         # Ensure merged_df is sorted by time
         merged_df = final_df.merge(transition_df, left_on="Path", right_index=True)
